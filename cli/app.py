@@ -1,3 +1,4 @@
+#app.py --
 import sqlite3
 def create_tables():
     connection = sqlite3.connect("academics.db")
@@ -28,6 +29,7 @@ class AcademicsDB:
     def __init__(self):
         self.connection = sqlite3.connect("academics.db")
         self.cursor = self.connection.cursor()
+        self.close = self.close_method
 
     def add_course(self, course_name, course_code, course_description):
         self.cursor.execute("INSERT INTO courses(course_name, course_code, course_description) VALUES (?,?,?)",
@@ -75,8 +77,6 @@ class AcademicsDB:
     def delete_course(self, course_id):
         self.cursor.execute("DELETE FROM courses WHERE id = ?", (course_id,))
         self.connection.commit()
-        print(f'Course with ID {course_id} deleted')
-
     def delete_student(self, student_id):
             self.cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
             self.connection.commit()
@@ -91,8 +91,9 @@ class AcademicsDB:
         self.connection.commit()
         print(f'Student with ID {student_id} updated')
 
-def close(self):
-    self.connection.close()
+    def close_method(self):
+        self.connection.close()
+        print("Database connection closed.")
 
 def main():
     db = AcademicsDB()
@@ -231,13 +232,11 @@ def main():
             break
         else:
             print("Invalid choice, please try again.")
-               
+          
         
 
 if __name__ == "__main__":
     main()
-
-
 
 
     
