@@ -1,5 +1,4 @@
 import sqlite3
-from .models import Student,Course
 def create_tables():
     connection = sqlite3.connect("academics.db")
     cursor = connection.cursor()
@@ -60,6 +59,9 @@ class AcademicsDB:
     def get_all_courses(self):
         self.cursor.execute("SELECT * FROM courses")
         return self.cursor.fetchall()
+    def list_students_taking_a_course(self, course_id):
+        self.cursor.execute("SELECT * FROM students WHERE course_id =?", (course_id,))
+        return self.cursor.fetchall()
     def get_all_students(self):
         query ='''
             SELECT students.id, students.first_name, students.last_name, students.email, courses.id,
@@ -71,14 +73,13 @@ class AcademicsDB:
         self.cursor.execute(query)
         return self.cursor.fetchall()
     def delete_course(self, course_id):
-        self.cursor.execute("DELETE FROM courses WHERE id = ?", (course_id))
+        self.cursor.execute("DELETE FROM courses WHERE id = ?", (course_id,))
         self.connection.commit()
         print(f'Course with ID {course_id} deleted')
 
     def delete_student(self, student_id):
-            self.cursor.execute("DELETE FROM students WHERE id = ?", (student_id))
+            self.cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
             self.connection.commit()
-            print(f'Student with ID {student_id} deleted')
     def update_course_code(self, course_code, course_id):
         self.cursor.execute("UPDATE courses SET course_code =? WHERE id =?",
                             (course_code, course_id))
@@ -104,12 +105,13 @@ def main():
         print("5. Course Exists")
         print("6. Assign Course to Student")
         print("7. Get All Courses")
-        print("8. Get All Students")
-        print("9. Delete Course")
-        print("10. Delete Student")
-        print("11. Update Course Code")
-        print("12. Update Student Email")
-        print("13. Exit")
+        print("8. List Students Taking a course")
+        print("9. Get All Students")
+        print("10. Delete Course")     
+        print("11. Delete Student")
+        print("12. Update Course Code")
+        print("13. Update Student Email")
+        print("14. Exit")
         choice = input("Enter choice: ")
       
         if not choice.isdigit():
@@ -177,13 +179,22 @@ def main():
             for course in courses:
                 print(f"course ID: {course[0]}, course name: {course[1]}, course code: {course[2]}, course description: {course[3]}")
         elif choice == 8:
+            course_id = input("Enter course ID: ")
+            if not course_id.isdigit():
+                print("Invalid course ID, please enter a number.")
+                continue
+            course_id = int(course_id)
+            students = db.list_students_taking_a_course(course_id)
+            for student in students:
+                print(f"student ID: {student[0]}, first name: {student[1]}, last name: {student[2]}, email: {student[3]}, course ID: {student[4]}")
+        elif choice == 9:
             students = db.get_all_students()
             for student in students:
                 if student[4] is not None:
                    print(f"student ID: {student[0]}, first name: {student[1]}, last name: {student[2]}, email: {student[3]}, course ID: {student[4]}, course name: {student[5]}, course code: {student[6]}")
                 else:
                     print(f"student ID: {student[0]}, first name: {student[1]}, last name: {student[2]}, email: {student[3]}, course: None")
-        elif choice == 9:
+        elif choice == 10:
             course_id = input("Enter course ID: ")
             if not course_id.isdigit():
                 print("Invalid course ID, please enter a number.")
@@ -191,7 +202,7 @@ def main():
             course_id = int(course_id)
             db.delete_course(course_id)
             print(f'Course with ID {course_id} deleted')
-        elif choice == 10:
+        elif choice == 11:
             student_id = input("Enter student ID: ")
             if not student_id.isdigit():
                 print("Invalid student ID, please enter a number.")
@@ -199,7 +210,7 @@ def main():
             student_id = int(student_id)
             db.delete_student(student_id)
             print(f'Student with ID {student_id} deleted')
-        elif choice == 11:
+        elif choice == 12:
             course_id = input("Enter course ID: ")
             if not course_id.isdigit():
                 print("Invalid course ID, please enter a number.")
@@ -207,7 +218,7 @@ def main():
             course_id = int(course_id)
             course_code = input("Enter course code: ")
             db.update_course_code(course_code, course_id)
-        elif choice == 12:
+        elif choice == 13:
             student_id = input("Enter student ID: ")
             if not student_id.isdigit():
                 print("Invalid student ID, please enter a number.")
@@ -215,7 +226,7 @@ def main():
             student_id = int(student_id)
             email = input("Enter student email: ")
             db.update_student_email(email, student_id)
-        elif choice == 13:
+        elif choice == 14:
             db.close()
             break
         else:
